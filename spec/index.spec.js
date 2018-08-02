@@ -132,5 +132,13 @@ describe.only("/api", () => {
         expect(res.body.msg).to.equal("not a valid article id");
       });
   });
+  //if i pass the address with an id that belongs to a different collection I get "article": null, so can address that will a 404 error
+  it("GET /api/articles/:article_id returns a 404 if passed an id from a different colletion ", () => {
+    return request
+      .get(`/api/articles/5b6307a3a825315b1f552a`)
+      .expect(400)
+      .then(res => {
+        expect(res.body.msg).to.equal("not a valid article id");
+      });
+  });
 });
-//if i pass the address with an id that belongs to a different collection I get "article": null, so can address that will a 404 error
