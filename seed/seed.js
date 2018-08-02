@@ -11,8 +11,6 @@ const seedDB = data => {
       ]);
     })
     .then(([topicDocs, userDocs]) => {
-      console.log(`${topicDocs.length} topics inserted`);
-      console.log(`${userDocs.length} users inserted`);
       //using .find here inside the map so we can match the name of who created it to the same name the user has inside
       const formattedArticles = data.articleData.map(article => {
         const userId = userDocs.find(
@@ -22,11 +20,13 @@ const seedDB = data => {
         return { ...article, created_by: userId, belongs_to: article.topic };
         //bringing back the article and changing created by, adding belong to.
       });
-      return Promise.all([Article.insertMany(formattedArticles), userDocs]);
+      return Promise.all([
+        Article.insertMany(formattedArticles),
+        userDocs,
+        topicDocs
+      ]);
     })
-    .then(([articleDocs, userDocs]) => {
-      console.log(articleDocs);
-      console.log(`${articleDocs.length} articles inserted`);
+    .then(([articleDocs, userDocs, topicDocs]) => {
       const formattedComments = data.commentData.map(comment => {
         const createdById = userDocs.find(
           user => comment.created_by === user.username
@@ -40,11 +40,13 @@ const seedDB = data => {
           belongs_to: articleRef
         };
       });
-      return Comment.insertMany(formattedComments);
-    })
-    .then(commentDocs => console.log(`${commentDocs.length} comments inserted`))
-
-    .catch(console.log);
+      return Promise.all([
+        Comment.insertMany(formattedComments),
+        userDocs,
+        topicDocs,
+        articleDocs
+      ]);
+    });
 };
 
 module.exports = seedDB;

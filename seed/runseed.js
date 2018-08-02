@@ -9,4 +9,5 @@ mongoose
     DB_URL,
     { useNewUrlParser: true }
   )
-  .then(() => seedDB(data));
+  .then(() => seedDB(data))
+  .then(() => mongoose.disconnect());

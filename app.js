@@ -21,18 +21,18 @@ app.get("/", (req, res) => {
 app.use("/api", apiRouter);
 
 app.use("/*", (req, res, next) => {
-  res.status(404).send("Path not found");
+  if (res.status === 404) res.status(404).send("Path not found");
+  else next(err);
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
-  if (err.code === "23502")
-    res.status(400).send(err.message || "Bad Server Request");
-  if (err.code === undefined)
-    res.status(400).send("Missing or Incorrect input fields");
-  if (err.message === "No data returned from the query.")
-    res.status(404).send("No matching item found");
+  //change to work properly!
+  if (res.status(err.status).send(err));
   else next(err);
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).send({ msg: "internal server error" });
 });
 
 module.exports = app;
