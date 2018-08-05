@@ -20,11 +20,11 @@ app.use(bodyParser.json());
 app.use("/api", apiRouter);
 
 app.use("/", (req, res, next) => {
-  res => {
-    res.send({
-      msg: "welcome to the homepage, please go to /api for the index"
+  res
+    .status(200)
+    .send({
+      msg: "welcome to the homepage, please use /api to view the index"
     });
-  };
 });
 
 app.use("/*", (req, res, next) => {
