@@ -5,7 +5,7 @@ const apiRouter = require("./routes/api");
 const mongoose = require("mongoose");
 const path = require("path");
 
-const { DB_URL } = require("./config");
+const { DB_URL } = process.env.DB_URL || require("./config").DB_URL;
 
 app.use("/api", express.static(__dirname + "/public"));
 
