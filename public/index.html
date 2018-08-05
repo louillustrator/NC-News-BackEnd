@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Northoders News Api</title>
+</head>
+
+<body>
+  <h1> API Endpoints</h1>
+
+  <h2>
+    "GET"
+    <code>/api/topics</code>
+    <p> --get all the topics</p>
+  </h2>
+
+  <h2>"GET"
+    <code>/api/topics/:topic_slug/articles</code>
+    <p>--Return all the articles for a certain topic, e.g: /api/topics/football/articles </p>
+  </h2>
+
+  <h2>"POST"
+    <code>/api/topics/:topic_slug/articles</code>
+    <p>--Add a new article to a topic. This route requires a JSON body with title and body key value pairs e.g: { "title": "new
+      article", "body": "This is my new article content"}</p>
+
+    <h2>
+      "GET"
+      <code>/api/articles</code>
+      <p> --get all the articles</p>
+    </h2>
+
+    <h2>
+      "GET"
+      <code>/api/articles/:article_id</code>
+      <p> --get an individual article</p>
+    </h2>
+
+    <h2>
+      "GET"
+      <code>/api/articles/:article_id/comments</code>
+      <p> --get all comments for an individual article</p>
+    </h2>
+
+    <h2>
+      "POST"
+      <code>/api/articles/:article_id/comments</code>
+      <p> --Add a new comment to an article. This route requires a JSON body with body and created_by key value pairs e.g: {"body":
+        "This is my new comment", "created_by": 'mongo id' for a user}</p>
+    </h2>
+
+    <h2>
+      "PUT"
+      <code>/api/articles/:article_id</code>
+      <p> --Increment or Decrement the votes of an article by one. This route requires a vote query of 'up' or 'down' e.g: /api/articles/:article_id?vote=up</p>
+    </h2>
+
+    <h2>
+      "PUT"
+      <code>/api/comments/:comment_id</code>
+      <p> --Increment or Decrement the votes of an comment by one. This route requires a vote query of 'up' or 'down' e.g: /api/articles/:article_id?vote=up</p>
+    </h2>
+
+    <h2>
+      "DELETE"
+      <code>/api/comments/:comment_id</code>
+      <p> --Deletes a comment</p>
+    </h2>
+
+    <h2>
+      "GET"
+      <code>/api/users</code>
+      <p> --get all the users</p>
+    </h2>
+
+    <h2>
+      "GET"
+      <code>/api/users/:username</code>
+      <p> --returns a single users data</p>
+    </h2>
+
+
+
+  </h2>
+
+
+</body>
+
+</html>

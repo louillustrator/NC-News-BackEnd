@@ -1,4 +1,4 @@
-const { Topic, Article } = require("../models");
+const { Topic, Article, User } = require("../models");
 
 const getAllTopics = (req, res, next) => {
   Topic.find()
@@ -26,21 +26,28 @@ const addArticleToTopic = (req, res, next) => {
   Topic.find({ slug: topic_slug })
     .then(topic => {
       if (topic.length === 0)
-        throw { status: 404, msg: "that topic doesn't exist!" };
+        Promise.reject({
+          status: 404,
+          msg: "that topic doesn't exist!"
+        });
       else {
         let newArticle = {
           title: req.body.title,
           body: req.body.body,
           belongs_to: topic_slug,
           created_by: req.body.created_by
-          //this id would be made in the front end
         };
-        return new Article(newArticle).save();
+        //finding user info so we can insert it into the object we return
+        return Promise.all([
+          Article.create(newArticle),
+          User.findById(req.body.created_by)
+        ]);
       }
     })
-    .then(article => {
+    .then(([article, user]) => {
+      article.created_by = user;
       res.status(201).send({
-        message: `new article insterted into ${topic_slug}`,
+        message: `new article inserted into ${topic_slug}`,
         article
       });
     })

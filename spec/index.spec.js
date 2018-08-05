@@ -10,7 +10,7 @@ const data = require("../seed/testData");
 let newMongoId = mongoose.Types.ObjectId();
 console.log(newMongoId);
 
-describe("/api", () => {
+describe("/api/topics", () => {
   let comments, users, topics, articles;
   beforeEach(() => {
     return seedDB(data).then(docs => {
@@ -96,49 +96,266 @@ describe("/api", () => {
         expect(res.body.msg).to.equal("that topic doesn't exist!");
       });
   });
-});
 
-describe.only("/api", () => {
-  let comments, users, topics, articles;
-  beforeEach(() => {
-    return seedDB(data).then(docs => {
-      [comments, users, topics, articles] = docs;
+  describe("/api/articles", () => {
+    let comments, users, topics, articles;
+    beforeEach(() => {
+      return seedDB(data).then(docs => {
+        [comments, users, topics, articles] = docs;
+      });
     });
-  });
-  after(() => {
-    mongoose.disconnect();
-  });
-  it("GET /api/articles brings back all articles", () => {
-    return request
-      .get("/api/articles")
-      .expect(200)
-      .then(res => expect(res.body).to.have.all.keys("articles"));
-  });
-  it("GET /api/articles/:article_id brings back an article", () => {
-    return request
-      .get(`/api/articles/${articles[0]._id}`)
-      .expect(200)
-      .then(res => {
-        expect(res.body).to.have.all.keys("article");
-        //I want to be able to look at articles keys but its not working
-        expect(res.body.article).to.be.an("object");
+    after(() => {
+      mongoose.disconnect();
+    });
+    it("GET /api/articles brings back all articles", () => {
+      return request
+        .get("/api/articles")
+        .expect(200)
+        .then(res => expect(res.body).to.have.all.keys("articles"));
+    });
+    it("GET /api/articles/:article_id brings back a single article", () => {
+      return request
+        .get(`/api/articles/${articles[0]._id}`)
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.have.all.keys("article");
+          // console.log(res.body, "***********");
+          // console.log(res.body.article, "<<<<<<<<<");
+          //I want to be able to look at articles keys but its not working
+          // expect(res.body.article.length).to.equal(1);
+          //??????
+          expect(res.body.article).to.have.all.keys(
+            "votes",
+            "_id",
+            "title",
+            "created_by",
+            "body",
+            "created_at",
+            "belongs_to",
+            "__v"
+          );
+          expect(res.body.article).to.be.an("object");
+        });
+    });
+    it("GET /api/articles/:article_id returns a 400 if passed an incorrect id ", () => {
+      return request
+        .get(`/api/articles/5b6307a3a825315b1f552a`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.msg).to.equal("not a valid article id");
+        });
+    });
+    it("GET /api/articles/:article_id returns a 404 if passed a valid id from a different colletion ", () => {
+      return request
+        .get(`/api/articles/${comments[0]._id}`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.msg).to.equal(
+            "that is not an article id, please try again"
+          );
+        });
+    });
+    it("GET /api/articles/:article_id/comments returns all the comments for an individual article", () => {
+      return request
+        .get(`/api/articles/${articles[0]._id}/comments`)
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.have.all.keys("comments");
+        });
+    });
+    it("GET /api/articles/:article_id/comments returns a 400 error if passed an invalid id", () => {
+      return request
+        .get(`/api/articles/8r67585769869898798/comments`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.msg).to.equal("not a valid article id");
+        });
+    });
+    it("GET /api/articles/:article_id/comments returns a 404 error if passed a valid id but from a different colection", () => {
+      return request
+        .get(`/api/articles/${users[0]._id}/comments`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.msg).to.equal("that article does not exist! ");
+        });
+    });
+    it("POST /api/articles/:article_id/comments adds a new comment to an article", () => {
+      const newComment = {
+        body: "this comment is pretty pointless tbh",
+        belongs_to: articles[0]._id,
+        created_by: users[0]._id
+      };
+      return request
+        .post(`/api/articles/${newComment.belongs_to}/comments`)
+        .send(newComment)
+        .expect(201)
+        .then(res => {
+          expect(res.body).to.have.all.keys("comment");
+        });
+    });
+    it("POST /api/articles/:article_id/comments returns a 400 error if the article id is not a valid id", () => {
+      const newComment = {
+        body: "this comment is pretty pointless tbh",
+        belongs_to: articles[0]._id,
+        created_by: users[0]._id
+      };
+      return request
+        .post(`/api/articles/octopi/comments`)
+        .send(newComment)
+        .expect(400)
+        .then(res => {
+          expect(res.body.msg).to.equal("not a valid article id");
+        });
+    });
+    it("POST /api/articles/:article_id/comments returns a 404 error if the id passed is not an article id but still valid", () => {
+      const newComment = {
+        body: "this comment is pretty pointless tbh",
+        belongs_to: articles[0]._id,
+        created_by: users[0]._id
+      };
+      return request
+        .post(`/api/articles/${topics[0].id}/comments`)
+        .send(newComment)
+        .expect(404)
+        .then(res => {
+          expect(res.body.msg).to.equal("that article does not exist!");
+        });
+    });
+    it("POST /api/articles/:article_id/comments returns a 400 error if any required information is missed", () => {
+      const newComment = {
+        belongs_to: articles[0]._id,
+        created_by: users[0]._id
+      };
+      return request
+        .post(`/api/articles/${newComment.belongs_to}/comments`)
+        .send(newComment)
+        .expect(400)
+        .then(res => {
+          expect(res.body.msg).to.equal("Plese check required fields");
+        });
+    });
+    it("PUT /api/articles/:article_id?vote=up the query increases the vote up by one each time", () => {
+      return request
+        .put(`/api/articles/${articles[0]._id}?vote=up`)
+        .expect(200)
+        .then(res => {
+          expect(res.body.article.votes).to.equal(articles[0].votes + 1);
+        });
+    });
+    it("PUT /api/articles/:article_id?vote=down the query decreases the vote down by one each time", () => {
+      return request
+        .put(`/api/articles/${articles[0]._id}?vote=down`)
+        .expect(200)
+        .then(res => {
+          expect(res.body.article.votes).to.equal(articles[0].votes - 1);
+        });
+    });
+
+    //write a test for short numbers
+    it("PUT /api/articles/:article_id?vote=down if passed an invalid id it will return a 404", () => {
+      return request
+        .put(`/api/articles/5b6307a3a825315b1f552a90?vote=down`)
+        .expect(404)
+        .then(res => {
+          expect(res.body.msg).to.equal("that is not a valid mongo id");
+        });
+    });
+
+    describe("/api/comments", () => {
+      let comments, users, topics, articles;
+      beforeEach(() => {
+        return seedDB(data).then(docs => {
+          [comments, users, topics, articles] = docs;
+        });
       });
-  });
-  it("GET /api/articles/:article_id returns a 400 if passed an incorrect id ", () => {
-    return request
-      .get(`/api/articles/5b6307a3a825315b1f552a`)
-      .expect(400)
-      .then(res => {
-        expect(res.body.msg).to.equal("not a valid article id");
+      after(() => {
+        mongoose.disconnect();
       });
-  });
-  //if i pass the address with an id that belongs to a different collection I get "article": null, so can address that will a 404 error
-  it("GET /api/articles/:article_id returns a 404 if passed an id from a different colletion ", () => {
-    return request
-      .get(`/api/articles/5b6307a3a825315b1f552a`)
-      .expect(400)
-      .then(res => {
-        expect(res.body.msg).to.equal("not a valid article id");
+
+      it("PUT /api/comments/:comment_id?vote=up the query increases the vote up by one each time", () => {
+        return request
+          .put(`/api/comments/${comments[0].id}?vote=up`)
+          .expect(200)
+          .then(res => {
+            expect(res.body.comment.votes).to.equal(comments[0].votes + 1);
+          });
       });
+
+      it("PUT /api/comments/:comment_id?vote=down the query decreases the vote down by one each time", () => {
+        return request
+          .put(`/api/comments/${comments[0]._id}?vote=down`)
+          .expect(200)
+          .then(res => {
+            expect(res.body.comment.votes).to.equal(comments[0].votes - 1);
+          });
+      });
+
+      it("PUT /api/comments/:comment_id?vote=down if passed an invalid id it will return a 404", () => {
+        return request
+          .put(`/api/comments/5b6307a3a825315b1f552a90?vote=down`)
+          .expect(404)
+          .then(res => {
+            expect(res.body.msg).to.equal("that is not a valid mongo id");
+          });
+      });
+
+      it("DELETE /api/comments/:comment_id", () => {
+        return request
+          .delete(`/api/comments/${comments[0]._id}`)
+          .expect(200)
+          .then(res => {
+            expect(res.body).to.have.all.keys("msg");
+            //now to check if it's gone
+            return request
+              .delete(`/api/comments/${comments[0]._id}`)
+              .expect(400)
+              .then(res => {
+                expect(res.body.msg).to.equal("this comment doesn't exist!");
+              });
+          });
+      });
+
+      describe("/api/users", () => {
+        let comments, users, topics, articles;
+        beforeEach(() => {
+          return seedDB(data).then(docs => {
+            [comments, users, topics, articles] = docs;
+          });
+        });
+        after(() => {
+          mongoose.disconnect();
+        });
+        it("GET /api/users returns all users", () => {
+          return request
+            .get("/api/users")
+            .expect(200)
+            .then(res => expect(res.body).to.have.all.keys("users"));
+        });
+        it("GET api/users/:username brings back a single users information", () => {
+          return request
+            .get("/api/users/butter_bridge")
+            .expect(200)
+            .then(res => {
+              expect(res.body.user).to.have.all.keys(
+                "__v",
+                "_id",
+                "username",
+                "name",
+                "avatar_url"
+              );
+            });
+        });
+        it("GET api/users/:username returns a 404 if passed an ivalid username", () => {
+          return request
+            .get("/api/users/hinkeydinkey")
+            .expect(404)
+            .then(res => {
+              expect(res.body.msg).to.equal(
+                "that is not a username please try again"
+              );
+            });
+        });
+      });
+    });
   });
 });

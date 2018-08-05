@@ -1,5 +1,7 @@
 const { Topic, Article, User, Comment } = require("../models");
 
+//get all articles
+
 const getAllArticles = (req, res, next) => {
   Article.find()
     .then(articles => {
@@ -8,11 +10,18 @@ const getAllArticles = (req, res, next) => {
     .catch(next);
 };
 
+//get all articles by id
+
 const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   Article.findOne({ _id: `${article_id}` })
     .then(article => {
-      res.status(200).send({ article });
+      article !== null
+        ? res.status(200).send({ article })
+        : next({
+            status: 404,
+            msg: "that is not an article id, please try again"
+          });
     })
     .catch(err => {
       if (err.name === "CastError")
@@ -21,25 +30,29 @@ const getArticleById = (req, res, next) => {
 };
 
 // Get all the comments for a individual article
-//not tested from here
+
 const getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
+
   Comment.find({ belongs_to: `${article_id}` })
     .then(comments => {
-      res.status(200).send({ comments });
+      comments.length !== 0
+        ? res.status(200).send({ comments })
+        : next({ status: 404, msg: "that article does not exist! " });
     })
     .catch(err => {
       if (err.name === "CastError")
-        next({ status: 400, msg: "not a valid comment id" });
+        next({ status: 400, msg: "not a valid article id" });
     });
 };
+
+//post a comment for an article
 
 const postCommentByArticleId = (req, res, next) => {
   const { article_id } = req.params;
 
   Article.find({ _id: article_id })
     .then(article => {
-      console.log(article);
       if (article.length === 0)
         throw { status: 404, msg: "that article does not exist!" };
       else {
@@ -48,26 +61,59 @@ const postCommentByArticleId = (req, res, next) => {
           belongs_to: article_id,
           created_by: req.body.created_by
         };
-        return new Comment(newComment).save();
+        return Promise.all([
+          Comment.create(newComment),
+          User.findById(req.body.created_by)
+        ]);
       }
     })
     // You'll also find it handy if your POST comment endpoint returns the new comment with the created_by property populated with the corresponding user object.
-    .then(comment => {
-      res.status(201).send({
-        msg: "new comment created",
-        comment
-      });
+    .then(([comment, user]) => {
+      comment.created_by = user;
+      res.status(201).send({ comment });
     })
     .catch(err => {
-      if (err.name === "CastError")
+      if (err.name === "CastError") {
         next({ status: 400, msg: "not a valid article id" });
+      }
+      if (err.name === "ValidationError") {
+        next({ status: 400, msg: "Plese check required fields" });
+      } else next(err);
     });
 };
-//error handle//test this for if the user id in the body is incorrect
+
+const updateVoteByArticleId = (req, res, next) => {
+  const { vote } = req.query;
+  const { article_id } = req.params;
+  Article.findById({ _id: `${article_id}` })
+    .then(article => {
+      if (article === null) {
+        throw { status: 404, msg: "that is not a valid mongo id" };
+      }
+
+      const amount = vote === "up" ? 1 : vote === "down" ? -1 : 0;
+
+      return Article.findByIdAndUpdate(
+        article_id,
+        { $inc: { votes: amount } },
+        { new: true }
+      );
+    })
+    .then(article => {
+      res.status(200).send({ article });
+    })
+    .catch(err => {
+      if (err.name === "CastError") {
+        next({ status: 400, msg: "not a valid article id" });
+      }
+      next(err);
+    });
+};
 
 module.exports = {
   getAllArticles,
   getArticleById,
   getCommentsByArticleId,
-  postCommentByArticleId
+  postCommentByArticleId,
+  updateVoteByArticleId
 };

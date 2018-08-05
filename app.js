@@ -3,8 +3,11 @@ const app = express();
 const bodyParser = require("body-parser");
 const apiRouter = require("./routes/api");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const { DB_URL } = require("./config");
+
+app.use("/api", express.static(__dirname + "/public"));
 
 //remeber to connect to mongoose!!
 mongoose.connect(
@@ -14,19 +17,13 @@ mongoose.connect(
 
 app.use(bodyParser.json());
 
-app.get("/", (req, res) => {
-  res.status(200).send({ msg: "what a fine homepage" });
-});
-
 app.use("/api", apiRouter);
 
 app.use("/*", (req, res, next) => {
-  if (res.status === 404) res.status(404).send("Path not found");
-  else next(err);
+  next({ status: 404 });
 });
 
 app.use((err, req, res, next) => {
-  //change to work properly!
   if (res.status(err.status).send(err));
   else next(err);
 });
