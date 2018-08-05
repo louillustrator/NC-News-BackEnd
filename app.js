@@ -21,14 +21,18 @@ app.use(bodyParser.json());
 app.use("/api", apiRouter);
 
 app.use("/*", (req, res, next) => {
-  next({ status: 404 });
-});
-
-app.use("/", (req, res, next) => {
-  res.status(200).send({
-    msg: "welcome to the homepage, please use /api to view the index"
+  next({
+    status: 404,
+    msg:
+      "please check the route, that one is not valid. Use /api to view the index"
   });
 });
+
+// app.use("/", (req, res, next) => {
+//   res.status(200).send({
+//     msg: "welcome to the homepage, please use /api to view the index"
+//   });
+// });
 
 app.use((err, req, res, next) => {
   if (res.status(err.status).send(err));
