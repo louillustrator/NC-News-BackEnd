@@ -1,7 +1,7 @@
 # Northcoders News Api
 
 Welcome to the Northcoders News API! You can use this to access nc_news endpoints where you can get information on various articles, topics and users in the database. This is a responsive API where any incorrect inputs will pass you an error message and information on how to recifty the issue.
-You can see the app here -
+You can see the app here - [lou-nc-news](https://lou-nc-news.herokuapp.com/api)
 
 ## Getting Started
 
