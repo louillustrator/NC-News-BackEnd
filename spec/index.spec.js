@@ -14,10 +14,6 @@ describe("/api/topics", () => {
   let comments, users, topics, articles;
   beforeEach(() => {
     return seedDB(data).then(docs => {
-      // articles = docs[3];
-      // topics = docs[2];
-      // users = docs[1];
-      // comments = docs[0];
       [comments, users, topics, articles] = docs;
     });
   });

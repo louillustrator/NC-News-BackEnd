@@ -5,8 +5,6 @@ const apiRouter = require("./routes/api");
 const mongoose = require("mongoose");
 const path = require("path");
 
-// const { DB_URL } = process.env.DB_URL || require("./config").DB_URL;
-
 const { DB_URL } =
   process.env.NODE_ENV !== "production" ? require("./config") : process.env;
 
@@ -22,14 +20,14 @@ app.use(bodyParser.json());
 
 app.use("/api", apiRouter);
 
+app.use("/*", (req, res, next) => {
+  next({ status: 404 });
+});
+
 app.use("/", (req, res, next) => {
   res.status(200).send({
     msg: "welcome to the homepage, please use /api to view the index"
   });
-});
-
-app.use("/*", (req, res, next) => {
-  next({ status: 404 });
 });
 
 app.use((err, req, res, next) => {

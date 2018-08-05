@@ -1,6 +1,7 @@
 # Northcoders News Api
 
-Welcome to the Northcoders News API! You can use this to access nc_news endpoints where you can get information on various articles, topics and users in the database.
+Welcome to the Northcoders News API! You can use this to access nc_news endpoints where you can get information on various articles, topics and users in the database. This is a responsive API where any incorrect inputs will pass you an error message and information on how to recifty the issue.
+You can see the app here -
 
 ## Getting Started
 
@@ -10,14 +11,22 @@ cd into it and open.
 
 ### Prerequisites
 
-Let's get all the software up and running by grabbing MongoDb, Express, BodyParser, Nodemon, Mocha and Chai
+Let's get all the software up and running by running the following command.
 
 ```js
  $ npm install
 ```
 
+This will install the following :
+
 ```js
-$ npm i mongodb mongoose bodyparser express nodemon mocha chai
+    chai: 4.1.2,
+    mocha: 5.0.5,
+    nodemon: 1.18.3,
+    supertest: 3.0.0,
+    body-parser: 1.18.3,
+    express: 4.16.3,
+    mongoose: 5.2.6
 ```
 
 If you dont already have it, now is a great time to grab Postman too!
@@ -73,7 +82,7 @@ Your server should now be up and running! Open Postman and go to
 localhost:9090/api
 ```
 
-You can now use the routes on the homepgae to GET and POST data.
+You can now use the routes on the homepage to GET and POST data.
 
 ## Running the tests
 
@@ -83,7 +92,25 @@ Run the test enviroment by ending the server connection and running the command
 npm run test
 ```
 
-These tests ensure that the endpoints will behave as expected
+These tests ensure that the endpoints will behave as expected. Feel free to create your own should you wish!
+
+## Break down into end to end tests
+
+Inside each describe block of the test files a route has several tests laid out. The are tests for the routes working and failing so searches can be adjusted accordingly!
+
+Here is an example:
+
+```js
+ it("GET /api/topics gives a 400 error with an invalid topic", () => {
+    return request
+      .get("/api/topics/banannas/articles")
+      .expect(400)
+      .then(res => {
+        expect(res.body.msg).to.equal("topic not found");
+      });
+```
+
+This is testing a route that needed a topic included but as "bannans" are not a valid topic an error will be sent back.
 
 ## Built With
 
