@@ -64,7 +64,7 @@ You can seed the database using
 npm run seed
 ```
 
-In a sepearte terminal. Set MongoDb running
+In a seperate terminal. Set MongoDb running
 
 ```js
 $ mongod

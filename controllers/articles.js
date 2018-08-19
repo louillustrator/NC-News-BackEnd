@@ -1,20 +1,20 @@
 const { Topic, Article, User, Comment } = require("../models");
 
-//get all articles
+// console.log(User_id);
 
 const getAllArticles = (req, res, next) => {
-  Article.find()
+  Article.find({})
+    .populate("created_by")
     .then(articles => {
       res.status(200).send({ articles });
     })
     .catch(next);
 };
 
-//get all articles by id
-
 const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   Article.findOne({ _id: `${article_id}` })
+    .populate("created_by")
     .then(article => {
       article !== null
         ? res.status(200).send({ article })
@@ -35,6 +35,7 @@ const getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
 
   Comment.find({ belongs_to: `${article_id}` })
+    .populate("created_by")
     .then(comments => {
       comments.length !== 0
         ? res.status(200).send({ comments })
@@ -52,6 +53,7 @@ const postCommentByArticleId = (req, res, next) => {
   const { article_id } = req.params;
 
   Article.find({ _id: article_id })
+
     .then(article => {
       if (article.length === 0)
         throw { status: 404, msg: "that article does not exist!" };
