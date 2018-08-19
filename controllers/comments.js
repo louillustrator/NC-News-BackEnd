@@ -7,7 +7,7 @@ const updateVoteByCommentId = (req, res, next) => {
   Comment.findById({ _id: `${comment_id}` })
     .then(comment => {
       if (comment === null) {
-        throw { status: 404, msg: "that is not a valid mongo id" };
+        throw { status: 404, msg: "that is not a valid comment id" };
       }
 
       const amount = vote === "up" ? 1 : vote === "down" ? -1 : 0;

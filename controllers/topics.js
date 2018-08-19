@@ -26,10 +26,7 @@ const addArticleToTopic = (req, res, next) => {
   Topic.find({ slug: topic_slug })
     .then(topic => {
       if (topic.length === 0)
-        Promise.reject({
-          status: 404,
-          msg: "that topic doesn't exist!"
-        });
+        throw { status: 404, msg: "that topic doesn't exist!" };
       else {
         let newArticle = {
           title: req.body.title,

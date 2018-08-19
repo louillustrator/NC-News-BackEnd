@@ -8,7 +8,6 @@ const seedDB = require("../seed/seed");
 const data = require("../seed/testData");
 
 let newMongoId = mongoose.Types.ObjectId();
-console.log(newMongoId);
 
 describe("/api/topics", () => {
   let comments, users, topics, articles;
@@ -93,7 +92,7 @@ describe("/api/topics", () => {
       });
   });
 
-  describe("/api/articles", () => {
+  describe.only("/api/articles", () => {
     let comments, users, topics, articles;
     beforeEach(() => {
       return seedDB(data).then(docs => {
@@ -115,11 +114,6 @@ describe("/api/topics", () => {
         .expect(200)
         .then(res => {
           expect(res.body).to.have.all.keys("article");
-          // console.log(res.body, "***********");
-          // console.log(res.body.article, "<<<<<<<<<");
-          //I want to be able to look at articles keys but its not working
-          // expect(res.body.article.length).to.equal(1);
-          //??????
           expect(res.body.article).to.have.all.keys(
             "votes",
             "_id",
@@ -253,7 +247,7 @@ describe("/api/topics", () => {
         .put(`/api/articles/5b6307a3a825315b1f552a90?vote=down`)
         .expect(404)
         .then(res => {
-          expect(res.body.msg).to.equal("that is not a valid mongo id");
+          expect(res.body.msg).to.equal("that is not a valid article id");
         });
     });
 
@@ -291,7 +285,7 @@ describe("/api/topics", () => {
           .put(`/api/comments/5b6307a3a825315b1f552a90?vote=down`)
           .expect(404)
           .then(res => {
-            expect(res.body.msg).to.equal("that is not a valid mongo id");
+            expect(res.body.msg).to.equal("that is not a valid comment id");
           });
       });
 
@@ -329,7 +323,7 @@ describe("/api/topics", () => {
         });
         it("GET api/users/:username brings back a single users information", () => {
           return request
-            .get("/api/users/butter_bridge")
+            .get(`/api/users/${users[0].username}`)
             .expect(200)
             .then(res => {
               expect(res.body.user).to.have.all.keys(

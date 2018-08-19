@@ -1,11 +1,10 @@
 const { Topic, Article, User, Comment } = require("../models");
 
-// console.log(User_id);
-
 const getAllArticles = (req, res, next) => {
   Article.find({})
     .populate("created_by")
     .then(articles => {
+      // console.log(articles);
       res.status(200).send({ articles });
     })
     .catch(next);
@@ -13,7 +12,7 @@ const getAllArticles = (req, res, next) => {
 
 const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  Article.findOne({ _id: `${article_id}` })
+  Article.findById(article_id)
     .populate("created_by")
     .then(article => {
       article !== null
@@ -28,8 +27,6 @@ const getArticleById = (req, res, next) => {
         next({ status: 400, msg: "not a valid article id" });
     });
 };
-
-// Get all the comments for a individual article
 
 const getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
@@ -46,8 +43,6 @@ const getCommentsByArticleId = (req, res, next) => {
         next({ status: 400, msg: "not a valid article id" });
     });
 };
-
-//post a comment for an article
 
 const postCommentByArticleId = (req, res, next) => {
   const { article_id } = req.params;
@@ -80,7 +75,9 @@ const postCommentByArticleId = (req, res, next) => {
       }
       if (err.name === "ValidationError") {
         next({ status: 400, msg: "Plese check required fields" });
-      } else next(err);
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -90,7 +87,7 @@ const updateVoteByArticleId = (req, res, next) => {
   Article.findById({ _id: `${article_id}` })
     .then(article => {
       if (article === null) {
-        throw { status: 404, msg: "that is not a valid mongo id" };
+        throw { status: 404, msg: "that is not a valid article id" };
       }
 
       const amount = vote === "up" ? 1 : vote === "down" ? -1 : 0;
