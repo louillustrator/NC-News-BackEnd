@@ -106,7 +106,7 @@ describe("/api/topics", () => {
       return request
         .get("/api/articles")
         .expect(200)
-        .then(res => expect(res.body).to.have.all.keys("articles"));
+        .then(res => expect(res.body).to.have.all.keys("articlesCounted"));
     });
     it("GET /api/articles/:article_id brings back a single article", () => {
       return request
@@ -122,7 +122,8 @@ describe("/api/topics", () => {
             "body",
             "created_at",
             "belongs_to",
-            "__v"
+            "__v",
+            "comment_count"
           );
           expect(res.body.article).to.be.an("object");
         });

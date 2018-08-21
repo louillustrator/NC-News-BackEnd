@@ -1,20 +1,49 @@
 const { Topic, Article, User, Comment } = require("../models");
 
 const getAllArticles = (req, res, next) => {
-  Article.find({})
-    .populate("created_by")
-    .then(articles => {
-      // console.log(articles);
-      res.status(200).send({ articles });
+  Promise.all([Article.find().populate("created_by"), Comment.find()])
+    .then(([article, comment]) => {
+      let articlesCounted = article.reduce((acc, curVal) => {
+        let obj = {
+          votes: curVal.votes,
+          _id: curVal._id,
+          title: curVal.title,
+          created_by: curVal.created_by,
+          body: curVal.body,
+          created_at: curVal.created_at,
+          belongs_to: curVal.belongs_to,
+          __v: curVal.__v
+        };
+        obj.comment_count = 0;
+        for (let i = 0; i < comment.length; i++) {
+          if (comment[i].belongs_to.toString() === obj._id.toString()) {
+            obj.comment_count++;
+          }
+        }
+        acc.push(obj);
+        return acc;
+      }, []);
+      res.status(200).send({ articlesCounted });
     })
+
+    //i need the article id to match belongs_to comment
+    // .then(articles => {
+    //   res.status(200).send({ articles });
+    // })
     .catch(next);
 };
 
 const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  Article.findById(article_id)
-    .populate("created_by")
-    .then(article => {
+
+  Promise.all([
+    Article.findById(article_id).populate("created_by"),
+    Comment.find({ belongs_to: article_id })
+  ])
+
+    .then(([article, comments]) => {
+      article.comment_count = comments.length;
+
       article !== null
         ? res.status(200).send({ article })
         : next({
@@ -22,6 +51,7 @@ const getArticleById = (req, res, next) => {
             msg: "that is not an article id, please try again"
           });
     })
+
     .catch(err => {
       if (err.name === "CastError")
         next({ status: 400, msg: "not a valid article id" });
