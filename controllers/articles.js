@@ -32,6 +32,16 @@ const getAllArticles = (req, res, next) => {
     // })
     .catch(next);
 };
+// const getAllArticles = (req, res, next) => {
+//   Article.find()
+//     .populate("created_by")
+//     .then(article => {
+//       article.forEach(
+//         Comment.find({ belongs_to: article.article_id })
+
+//       );
+//     });
+// };
 
 const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -43,18 +53,21 @@ const getArticleById = (req, res, next) => {
 
     .then(([article, comments]) => {
       article.comment_count = comments.length;
-
-      article !== null
-        ? res.status(200).send({ article })
-        : next({
-            status: 404,
-            msg: "that is not an article id, please try again"
-          });
+      if (article !== null) {
+        res.status(200).send({ article });
+      }
     })
-
     .catch(err => {
       if (err.name === "CastError")
         next({ status: 400, msg: "not a valid article id" });
+      if (err.name === "TypeError")
+        next({
+          status: 404,
+          msg: "that is not an article id, please try again"
+        });
+      else {
+        next(err);
+      }
     });
 };
 

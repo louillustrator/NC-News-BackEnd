@@ -92,7 +92,7 @@ describe("/api/topics", () => {
       });
   });
 
-  describe.only("/api/articles", () => {
+  describe("/api/articles", () => {
     let comments, users, topics, articles;
     beforeEach(() => {
       return seedDB(data).then(docs => {
@@ -138,7 +138,7 @@ describe("/api/topics", () => {
     });
     it("GET /api/articles/:article_id returns a 404 if passed a valid id from a different colletion ", () => {
       return request
-        .get(`/api/articles/${comments[0]._id}`)
+        .get(`/api/articles/${users[0]._id}`)
         .expect(404)
         .then(res => {
           expect(res.body.msg).to.equal(
