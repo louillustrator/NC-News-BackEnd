@@ -4,9 +4,13 @@ const bodyParser = require("body-parser");
 const apiRouter = require("./routes/api");
 const mongoose = require("mongoose");
 const path = require("path");
+const cors = require("cors");
 
 const { DB_URL } =
   process.env.NODE_ENV !== "production" ? require("./config") : process.env;
+
+//internet thing
+app.use(cors());
 
 app.use("/api", express.static(__dirname + "/public"));
 
