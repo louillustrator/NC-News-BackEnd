@@ -12,6 +12,7 @@ const getArticlesForTopic = (req, res, next) => {
   const { topic_slug } = req.params;
 
   Article.find({ belongs_to: `${topic_slug}` })
+    .populate("created_by")
     .then(article => {
       article.length !== 0
         ? res.status(200).send({ article })
